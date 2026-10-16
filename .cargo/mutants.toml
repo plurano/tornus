@@ -1,0 +1,13 @@
+# SPDX-FileCopyrightText: 2026 Lusoris <lusoris@pm.me>
+# SPDX-License-Identifier: EUPL-1.2
+#
+# cargo-mutants configuration. Each exclusion is a mutant no test can kill
+# because it does not change behaviour; the reason sits beside it. Each
+# entry is a category D exception (entered 2026-10-16, expires 2027-02-13):
+# re-check it, or remove it when the code it names changes.
+exclude_re = [
+    # StepPath is built only through StepPath::parse (Deserialize calls it
+    # too), which refuses empty input, so len is never 0 and is_empty is
+    # always false.
+    'replace StepPath::is_empty -> bool with false',
+]
