@@ -79,6 +79,7 @@
 //! # }
 //! ```
 
+pub mod encoding;
 pub mod error;
 pub mod geometry;
 pub mod id;
