@@ -150,6 +150,15 @@ fn a_path_refusal_converts_into_the_crate_error() {
     );
 }
 
+/// Positive: a configuration without boundary-layer refinement reports it
+/// as off, and one with it as on.
+#[test]
+fn the_refinement_flag_is_carried_as_given() -> Fallible {
+    assert!(!MeshConfig::new(100, 2_000, false)?.boundary_layer_refinement());
+    assert!(MeshConfig::new(100, 2_000, true)?.boundary_layer_refinement());
+    Ok(())
+}
+
 /// Negative: an empty or inverted element-size range is refused, and a
 /// tolerance outside its range with it.
 #[test]
