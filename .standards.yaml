@@ -50,6 +50,12 @@ register:
         format: json
         selector: invariants.*
 exceptions:
+  - rule: mutants
+    path: .cargo/mutants.toml
+    category: D
+    entered: "2026-10-16"
+    reason: "cargo-mutants exclusion of StepPath::is_empty -> false: StepPath is built only through StepPath::parse, which refuses empty input, so the mutant does not change behaviour and no test can kill it; re-check it, or remove it when the code it names changes (stated in .cargo/mutants.toml)"
+    expires: "2027-02-13"
   - rule: HISS-11
     path: .github/workflows/release.yml
     reason: adoption found the release workflows short of the declared supply chain (SLSA Build Level 3 declared, Level 0 measured; enforce_cosign without a cosign signing step; require_sbom without an SBOM step); raise them as docs/guides/releasing.md in Praetor describes, then remove this entry
