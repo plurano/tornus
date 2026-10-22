@@ -3,7 +3,7 @@ version: 1
 repository:
   owner: plurano
   name: tornus
-  visibility: private
+  visibility: public
   description: "Geometric modelling kernel in Rust for CAD, with a public conformance corpus."
   homepage: ""
   topics: []
