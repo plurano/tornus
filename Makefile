@@ -4,11 +4,11 @@
 # Praetor ships one binary under two names; resolve whichever is installed.
 PRAETORCTL ?= $(shell command -v praetorctl 2>/dev/null || command -v standardsctl 2>/dev/null || echo praetorctl)
 CARGO_DENY ?= cargo deny
-.PHONY: all verify-all compile-context compile-context-verify caveman-sources audit build test licences
+.PHONY: all verify-all compile-context compile-context-verify caveman-sources audit build test licences planted-crates
 
 all: build
 
-verify-all: compile-context-verify caveman-sources audit test licences
+verify-all: compile-context-verify caveman-sources audit test licences planted-crates
 
 compile-context:
 	@$(PRAETORCTL) compile-context
@@ -29,15 +29,23 @@ build:
 	@python3 -B tools/check_reuse.py
 
 # The licence allow-list of deny.toml over the locked graph. The planted case:
-# the crate under tools/deny/refused names a licence the list does not allow,
-# and cargo-deny exits 4 when a licence check fails; any other status means it
-# did not run the check.
+# the crate under tools/deny/fixtures/refused names a licence the list does not
+# allow, and cargo-deny exits 4 when a licence check fails; any other status
+# means it did not run the check.
 licences:
 	$(CARGO_DENY) --version
 	$(CARGO_DENY) --locked --config $(CURDIR)/deny.toml check licenses
-	@status=0; $(CARGO_DENY) --manifest-path tools/deny/refused/Cargo.toml \
+	@status=0; $(CARGO_DENY) --manifest-path tools/deny/fixtures/refused/Cargo.toml \
 		--locked --config $(CURDIR)/deny.toml check licenses \
 		>/dev/null 2>&1 || status=$$?; test "$$status" -eq 4 \
 		|| { printf 'FAIL: the planted licence was not refused: cargo-deny exited %s, not 4\n' \
 		"$$status" >&2; exit 1; }
 	@printf '%s\n' 'PASS: the planted licence is refused.'
+
+# Planted crate directory placement: every planted crate (publish = false, own
+# workspace) must sit under a fixtures/ segment so the engine reader drops it
+# and does not build a phantom library node; the selftest exercises parser
+# shapes and scans a scratch git repository.
+planted-crates:
+	@python3 -B tools/check_planted_crates.py --selftest
+	@python3 -B tools/check_planted_crates.py
