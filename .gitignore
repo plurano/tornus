@@ -1,4 +1,6 @@
 target/
+# The documentation site as `python -m mkdocs build` writes it (mkdocs.yml).
+/site/
 .DS_Store
 
 # BEGIN praetor private artifacts (praetorctl adopt)
