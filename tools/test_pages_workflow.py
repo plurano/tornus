@@ -13,6 +13,10 @@ NO_QUEUE = "deploy job must queue its runs with queue: max"
 CANCELS = "deploy job must not cancel a run in progress"
 # The only workflow-level group accepted; one group per pull request, one per run otherwise.
 RUN_GROUP = "pages-${{ github.event_name == 'pull_request' && github.ref || github.run_id }}"
+# The one group every deploy waits in so two runs cannot deploy at the same time.
+DEPLOY_GROUP = "pages-deploy"
+# Problem message when the deploy job does not wait in the shared deploy group.
+SPLIT_QUEUE = "deploy job must wait in the one group pages-deploy"
 
 
 class CheckError(Exception):
@@ -74,8 +78,10 @@ def concurrency_problems(text: str) -> list[str]:
     workflow = mapping(text.splitlines(), "concurrency:")
     deploy = mapping(deploy_job(text), "    concurrency:")
     problems = []
-    if workflow and workflow.get("group", "") != RUN_GROUP:
+    if workflow.get("group", "") != RUN_GROUP:
         problems.append(SHARED_GROUP)
+    if deploy.get("group") != DEPLOY_GROUP:
+        problems.append(SPLIT_QUEUE)
     if deploy.get("queue") != "max":
         problems.append(NO_QUEUE)
     if "cancel-in-progress" in deploy and deploy["cancel-in-progress"] != "false":
@@ -208,6 +214,34 @@ class PagesWorkflowTests(unittest.TestCase):
         self.assertNotEqual(changed, self.text)
         self.assertEqual(concurrency_problems(changed), [SHARED_GROUP])
 
+    def test_scalar_workflow_group(self):
+        """A scalar workflow group shared by main pushes is rejected."""
+        changed = self.text.replace(
+            "concurrency:\n  group: " + RUN_GROUP + "\n",
+            "concurrency: pages-${{ github.ref }}\n",
+        )
+        self.assertNotEqual(changed, self.text)
+        self.assertEqual(concurrency_problems(changed), [SHARED_GROUP])
+
+    def test_workflow_concurrency_missing(self):
+        """A workflow without its concurrency block is rejected."""
+        changed = self.text.replace(
+            "concurrency:\n  group: " + RUN_GROUP + "\n"
+            "  cancel-in-progress: ${{ github.event_name == 'pull_request' }}\n",
+            "",
+        )
+        self.assertNotEqual(changed, self.text)
+        self.assertEqual(concurrency_problems(changed), [SHARED_GROUP])
+
+    def test_deploy_group_per_run(self):
+        """A deploy group of its own per run is rejected."""
+        changed = self.text.replace(
+            "      group: pages-deploy\n",
+            "      group: pages-${{ github.run_id }}\n",
+        )
+        self.assertNotEqual(changed, self.text)
+        self.assertEqual(concurrency_problems(changed), [SPLIT_QUEUE])
+
     def test_deploy_queue_missing(self):
         """A deploy concurrency group without a queue is rejected."""
         changed = self.text.replace("      queue: max\n", "")
@@ -224,7 +258,7 @@ class PagesWorkflowTests(unittest.TestCase):
         """A deploy job without concurrency is rejected."""
         changed = self.text.replace("    concurrency:\n      group: pages-deploy\n      queue: max\n", "")
         self.assertNotEqual(changed, self.text)
-        self.assertEqual(concurrency_problems(changed), [NO_QUEUE])
+        self.assertEqual(concurrency_problems(changed), [SPLIT_QUEUE, NO_QUEUE])
 
     def test_deploy_cancels(self):
         """A deploy job that cancels runs in progress is rejected."""
