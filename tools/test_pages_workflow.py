@@ -7,7 +7,6 @@ import re
 import unittest
 from pathlib import Path
 
-
 WORKFLOW = Path(__file__).resolve().parent.parent / ".github/workflows/pages.yml"
 
 
