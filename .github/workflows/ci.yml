@@ -44,6 +44,12 @@ jobs:
         if: github.event.pull_request.draft != true
         uses: actions/checkout@v7
 
+      # The workflow tests under tools/, the Pages deploy guard among them;
+      # they need no crate, so they run before the Cargo check.
+      - name: Workflow tests
+        if: github.event.pull_request.draft != true
+        run: python3 -B -m unittest discover -s tools -p 'test_*.py'
+
       # Hand edit until the engine's rust-systems template carries this guard
       # (praetor order engine-flavor-ci-no-manifest-guard-1723): with no root
       # Cargo.toml there is no crate to check, so the cargo steps are skipped

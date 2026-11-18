@@ -22,8 +22,11 @@ caveman-sources:
 audit:
 	@$(PRAETORCTL) audit
 
+# The REUSE selftest, then the workflow tests under tools/ (the Pages deploy
+# guard among them).
 test: build
 	@python3 -B tools/check_reuse.py selftest
+	python3 -B -m unittest discover -s tools -p 'test_*.py'
 
 build:
 	@python3 -B tools/check_reuse.py
