@@ -3,7 +3,7 @@
 
 //! `tornus-geometry`: the bounded geometry and meshing limits.
 //!
-//! *Tornus* is Latin for a turner's lathe (TOR-nus); this crate is the part
+//! *Tornus* is Latin for a turner's lathe (TOR-noos); this crate is the part
 //! of it that holds the limits before any tool turns.
 //!
 //! The code moved from the Aegis OS `aegis-hephaestus` crate (placement
