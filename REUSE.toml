@@ -24,6 +24,7 @@ path = [
     ".paperclip/**",
     ".vscode/**",
     "docs/**",
+    ".coderabbit.yaml",
     ".editorconfig",
     ".gitattributes",
     ".standards-baseline.json",
