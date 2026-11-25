@@ -56,7 +56,10 @@ pre-commit:
         fi
     zizmor:
       glob: ".github/workflows/*.{yml,yaml}"
-      run: zizmor --offline --no-progress .github/workflows
+      run: >-
+        if command -v zizmor >/dev/null 2>&1; then zizmor --offline --no-progress
+        .github/workflows; else echo zizmor is not installed, install it with
+        cargo install --locked zizmor@1.33.1 >&2; exit 1; fi
     context-check:
       run: sh .config/lefthook/engine.sh compile-context --verify
     hiss-audit:
