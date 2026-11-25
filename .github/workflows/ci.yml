@@ -19,6 +19,9 @@ env:
   CARGO_MUTANTS_VERSION: "27.1.0"
   CARGO_MUTANTS_SHA256_LINUX: "dfe6dc37d0342c891d2829b5a695aa57c2d0edecef7e7d0399a30cc6e206411e"
 
+permissions:
+  contents: read
+
 jobs:
   test:
     runs-on: ubuntu-26.04
@@ -42,7 +45,9 @@ jobs:
 
       - name: Checkout source
         if: github.event.pull_request.draft != true
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       # Hand edit until the engine's rust-systems template carries this guard
       # (praetor order engine-flavor-ci-no-manifest-guard-1723): with no root
