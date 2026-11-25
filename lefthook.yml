@@ -54,6 +54,9 @@ pre-commit:
         fi; else echo reuse is not installed, skipping >&2; fi; else echo no
         REUSE.toml or LICENSES/ at the repository root, skipping reuse lint >&2;
         fi
+    zizmor:
+      glob: ".github/workflows/*.{yml,yaml}"
+      run: zizmor --offline --no-progress .github/workflows
     context-check:
       run: sh .config/lefthook/engine.sh compile-context --verify
     hiss-audit:
